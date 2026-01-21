@@ -21,3 +21,10 @@ fn test_headers() {
     let client = default_client();
     assert!(client.block_headers(0).is_ok());
 }
+
+#[test]
+fn test_filters() {
+    let client = default_client();
+    let filters = client.filters(0).unwrap();
+    assert!(filters.len() == 2000);
+}

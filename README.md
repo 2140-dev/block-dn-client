@@ -10,3 +10,5 @@ This is a client implementation for a subset of the [`block-dn`](https://github.
 
 `headers/<start_block>`: Returns up to 100_000 block headers.
 
+`filters/<start_block>`: Returns up to 2_000 compact block filters.
+

@@ -2,8 +2,9 @@
 #![warn(missing_docs)]
 use core::fmt;
 use core::time::Duration;
+use std::io::Cursor;
 
-use bitcoin::block::Header;
+use bitcoin::{bip158::BlockFilter, block::Header, consensus::Decodable};
 use models::{Html, ServerStatus};
 
 /// Data models for server queries and responses.
@@ -142,5 +143,21 @@ impl<'e> Client<'e> {
             headers.push(bitcoin::consensus::deserialize::<Header>(chunk)?);
         }
         Ok(headers)
+    }
+
+    /// Return up to 2,000 compact block filters starting from the specified height.
+    pub fn filters(&self, start_height: u32) -> Result<Vec<BlockFilter>, Error> {
+        let route = self
+            .endpoint
+            .append_route(format!("filters/{start_height}"));
+        let response = bitreq::get(route)
+            .with_timeout(self.timeout.as_secs())
+            .send()?;
+        let mut cursor = Cursor::new(response.into_bytes());
+        let mut filters = Vec::new();
+        while let Ok(bytes) = Vec::<u8>::consensus_decode_from_finite_reader(&mut cursor) {
+            filters.push(BlockFilter::new(&bytes));
+        }
+        Ok(filters)
     }
 }
