@@ -3,7 +3,7 @@
 use core::time::Duration;
 use std::{borrow::Cow, io::Cursor, net::SocketAddr};
 
-use bitcoin::{bip158::BlockFilter, block::Header, consensus::Decodable};
+use bitcoin::{Block, BlockHash, bip158::BlockFilter, block::Header, consensus::Decodable};
 use models::{Html, ServerStatus, TapTweaks};
 
 /// Errors that may occur when querying.
@@ -151,6 +151,16 @@ impl<'e> Client<'e> {
             .with_timeout(self.timeout.as_secs())
             .send()?;
         Ok(response.json::<TapTweaks>()?)
+    }
+
+    /// Fetch the block by its hash.
+    pub fn block(&self, block_hash: BlockHash) -> Result<Block, Error> {
+        let route = self.endpoint.append_route(format!("block/{block_hash}"));
+        let response = bitreq::get(route)
+            .with_timeout(self.timeout.as_secs())
+            .send()?;
+        let block = bitcoin::consensus::deserialize::<Block>(response.as_bytes())?;
+        Ok(block)
     }
 }
 

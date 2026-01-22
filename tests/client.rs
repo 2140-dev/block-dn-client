@@ -38,3 +38,17 @@ fn test_tap_tweaks() {
     assert!(!tweaks.blocks.is_empty());
     let _ = tweaks.fallible_into_iterator();
 }
+
+#[test]
+fn test_block() {
+    let client = default_client();
+    assert!(
+        client
+            .block(
+                "0000000000000000000320283a032748cef8227873ff4872689bf23f1cda83a5"
+                    .parse()
+                    .unwrap()
+            )
+            .is_ok()
+    )
+}

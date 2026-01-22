@@ -14,6 +14,8 @@ This is a client implementation for a subset of the [`block-dn`](https://github.
 
 `sp/tweak-data/<start_block>`: Returns up to 2_000 blocks of BIP-352 partial secrets.
 
+`block/<block_hash>`: Fetch a block by its hash.
+
 # Getting Started
 
 Download all filters from height 700_000 up to the current height.
