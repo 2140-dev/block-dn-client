@@ -20,8 +20,8 @@ pub struct Endpoint<'e>(Cow<'e, str>);
 impl<'e> Endpoint<'e> {
     /// The original `block-dn` server hosted at `block-dn.org`.
     pub const BLOCK_DN_ORG: Self = Self(Cow::Borrowed("https://block-dn.org"));
-    /// Taproot-specific filters hosted by `2140.dev`.
-    pub const TAPROOT_DN: Self = Self(Cow::Borrowed("https://taprootdn.xyz"));
+    // Taproot-specific filters hosted by `2140.dev`.
+    // pub const TAPROOT_DN: Self = Self(Cow::Borrowed("https://taprootdn.xyz"));
     /// Local host at port 8080.
     pub const LOCAL_HOST: Self = Self(Cow::Borrowed("https://127.0.0.1:8080"));
 
