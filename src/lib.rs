@@ -4,7 +4,7 @@ use core::time::Duration;
 use std::{borrow::Cow, io::Cursor, net::SocketAddr};
 
 use bitcoin::{bip158::BlockFilter, block::Header, consensus::Decodable};
-use models::{Html, ServerStatus};
+use models::{Html, ServerStatus, TapTweaks};
 
 /// Errors that may occur when querying.
 pub mod error;
@@ -140,6 +140,17 @@ impl<'e> Client<'e> {
             filters.push(BlockFilter::new(&bytes));
         }
         Ok(filters)
+    }
+
+    /// Return up to 2,000 blocks of BIP-352 partial secrets (key tweaks).
+    pub fn tweaks(&self, start_height: u32) -> Result<TapTweaks, Error> {
+        let route = self
+            .endpoint
+            .append_route(format!("sp/tweak-data/{start_height}"));
+        let response = bitreq::get(route)
+            .with_timeout(self.timeout.as_secs())
+            .send()?;
+        Ok(response.json::<TapTweaks>()?)
     }
 }
 

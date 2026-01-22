@@ -28,3 +28,13 @@ fn test_filters() {
     let filters = client.filters(0).unwrap();
     assert!(filters.len() == 2000);
 }
+
+#[test]
+fn test_tap_tweaks() {
+    let client = Builder::new()
+        .timeout(core::time::Duration::from_secs(10))
+        .build();
+    let tweaks = client.tweaks(900_000).unwrap();
+    assert!(!tweaks.blocks.is_empty());
+    let _ = tweaks.fallible_into_iterator();
+}

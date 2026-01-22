@@ -1,3 +1,7 @@
+use std::collections::HashMap;
+
+use bitcoin::PublicKey;
+
 /// A string representing HTML. Suitable to render on a webpage.
 #[derive(Debug)]
 pub struct Html(pub String);
@@ -27,4 +31,34 @@ pub struct ServerStatus {
     pub entries_per_filter_file: u32,
     /// Entries per silent payments tweak file.
     pub entries_per_sptweak_file: u32,
+}
+
+/// The partial secrets for each BIP-352 transaction in the range of blocks.
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct TapTweaks {
+    /// The start height of the response.
+    pub start_height: u32,
+    /// Number of blocks in the response, up to 2,000.
+    pub num_blocks: u32,
+    /// The tweaks for each block.
+    pub blocks: Vec<Option<HashMap<u32, String>>>,
+}
+
+impl TapTweaks {
+    /// Convert the response into an iterator of blocks with transaction index and corresponding
+    /// public key.
+    ///
+    /// # Panics
+    ///
+    /// If the partial secret is not a valid hex encoding of a public key.
+    pub fn fallible_into_iterator(self) -> impl Iterator<Item = Option<HashMap<u32, PublicKey>>> {
+        self.blocks.into_iter().map(|tweaks| {
+            tweaks.map(|tweaks| {
+                tweaks
+                    .into_iter()
+                    .map(|(tx_index, pk_str)| (tx_index, pk_str.parse::<PublicKey>().unwrap()))
+                    .collect::<HashMap<u32, PublicKey>>()
+            })
+        })
+    }
 }

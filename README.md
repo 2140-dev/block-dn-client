@@ -12,3 +12,5 @@ This is a client implementation for a subset of the [`block-dn`](https://github.
 
 `filters/<start_block>`: Returns up to 2_000 compact block filters.
 
+`sp/tweak-data/<start_block>`: Returns up to 2_000 blocks of BIP-352 partial secrets.
+
