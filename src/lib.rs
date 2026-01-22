@@ -2,7 +2,7 @@
 #![warn(missing_docs)]
 use core::fmt;
 use core::time::Duration;
-use std::io::Cursor;
+use std::{borrow::Cow, io::Cursor, net::SocketAddr};
 
 use bitcoin::{bip158::BlockFilter, block::Header, consensus::Decodable};
 use models::{Html, ServerStatus};
@@ -42,17 +42,25 @@ impl From<bitcoin::consensus::encode::Error> for Error {
 
 /// An endpoint for a `block-dn` server.
 #[derive(Debug, Clone)]
-pub struct Endpoint<'e>(&'e str);
+pub struct Endpoint<'e>(Cow<'e, str>);
 
 impl<'e> Endpoint<'e> {
     /// The original `block-dn` server hosted at `block-dn.org`.
-    pub const BLOCKDNORG: Self = Self("https://block-dn.org");
+    pub const BLOCK_DN_ORG: Self = Self(Cow::Borrowed("https://block-dn.org"));
     /// Taproot-specific filters hosted by `2140.dev`.
-    pub const TAPROOTDN: Self = Self("https://taprootdn.xyz");
+    pub const TAPROOT_DN: Self = Self(Cow::Borrowed("https://taprootdn.xyz"));
+    /// Local host at port 8080.
+    pub const LOCAL_HOST: Self = Self(Cow::Borrowed("https://127.0.0.1:8080"));
 
     /// Use your self-hosted `block-dn` instance.
     pub fn from_custom_domain(other: &'static str) -> Self {
-        Self(other)
+        Self(Cow::Borrowed(other))
+    }
+
+    /// Use a static IP address.
+    pub fn from_socket_address(other: SocketAddr) -> Self {
+        let address = other.to_string();
+        Self(Cow::Owned(format!("https://{address}")))
     }
 
     /// Append a route to the endpoint.
@@ -72,7 +80,7 @@ impl<'e> Builder<'e> {
     /// Create a new builder [`ClientBuilder`].
     pub fn new() -> Self {
         Self {
-            endpoint: Endpoint::BLOCKDNORG,
+            endpoint: Endpoint::BLOCK_DN_ORG,
             timeout: Duration::from_secs(1),
         }
     }
@@ -115,7 +123,7 @@ impl<'e> Client<'e> {
     const EXPECTED_HEADER_LIST_SIZE: usize = 100_000;
     /// Return the root HTML of the server.
     pub fn index_html(&self) -> Result<Html, Error> {
-        let response = bitreq::get(self.endpoint.0)
+        let response = bitreq::get(self.endpoint.0.to_string())
             .with_timeout(self.timeout.as_secs())
             .send()?;
         let html = response.as_str()?;
@@ -159,5 +167,20 @@ impl<'e> Client<'e> {
             filters.push(BlockFilter::new(&bytes));
         }
         Ok(filters)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+
+    use crate::Endpoint;
+
+    #[test]
+    fn test_endpoint() {
+        let google = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)), 8080);
+        let endpoint = Endpoint::from_socket_address(google);
+        let filters_route = endpoint.append_route("filters/0");
+        assert_eq!(filters_route.as_str(), "https://8.8.8.8:8080/filters/0");
     }
 }

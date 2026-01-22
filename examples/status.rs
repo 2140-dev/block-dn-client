@@ -1,6 +1,6 @@
 use core::time::Duration;
 
-const ENDPOINT: block_dn_client::Endpoint<'static> = block_dn_client::Endpoint::BLOCKDNORG;
+const ENDPOINT: block_dn_client::Endpoint<'static> = block_dn_client::Endpoint::BLOCK_DN_ORG;
 const TIMEOUT: Duration = Duration::from_secs(2);
 
 fn main() {
