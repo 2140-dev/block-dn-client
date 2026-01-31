@@ -62,3 +62,14 @@ impl TapTweaks {
         })
     }
 }
+
+/// Fee estimates for a given block confirmation.
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct FeeEstimates {
+    /// sat/kvb.
+    pub fee_sat_per_kvbyte: u64,
+    /// sat/kwu.
+    pub fee_sat_per_kweight: u64,
+    /// sat/vb.
+    pub fee_sat_per_vbyte: u64,
+}
