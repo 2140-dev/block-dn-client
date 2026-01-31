@@ -53,6 +53,6 @@ fn test_block() {
 
 #[test]
 fn test_estimate_fee() {
-    let client = Builder::new().endpoint(Endpoint::DEV_2140).build();
+    let client = Builder::new().endpoint(Endpoint::BLOCK_DN_ORG).build();
     assert!(client.estimate_smart_fee(1).is_ok());
 }
